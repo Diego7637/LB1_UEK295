@@ -1,0 +1,270 @@
+openapi: 3.0.3
+info:
+  title: üK295 Shop API
+  version: 1.0.0
+  description: Product and category management API for the lb1_uek295 database.
+servers:
+  - url: http://localhost/api/v1
+security:
+  - bearerAuth: []
+paths:
+  /authenticate:
+    post:
+      summary: Authenticate and receive a JWT
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username, password]
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Authentication succeeded
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [token, expires_in, user]
+                properties:
+                  token:
+                    type: string
+                  expires_in:
+                    type: integer
+                  user:
+                    type: object
+                    properties:
+                      username:
+                        type: string
+        '401':
+          description: Invalid credentials
+  /products:
+    get:
+      summary: List all products
+      responses:
+        '200':
+          description: Product list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Product'
+    post:
+      summary: Create a product using the next available ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductInput'
+      responses:
+        '201':
+          description: Product created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+  /product/{product_id}:
+    parameters:
+      - in: path
+        name: product_id
+        required: true
+        schema:
+          type: integer
+    get:
+      summary: Get a product by ID
+      responses:
+        '200':
+          description: Product
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '404':
+          description: Product not found
+    put:
+      summary: Create or replace a product at the specified ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductInput'
+      responses:
+        '200':
+          description: Existing product updated
+        '201':
+          description: New product created
+    patch:
+      summary: Replace a product at the specified ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductInput'
+      responses:
+        '200':
+          description: Product updated
+    delete:
+      summary: Delete a product
+      responses:
+        '200':
+          description: Product deleted
+        '404':
+          description: Product not found
+  /categories:
+    get:
+      summary: List all categories
+      responses:
+        '200':
+          description: Category list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Category'
+    post:
+      summary: Create a category using the next available ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CategoryInput'
+      responses:
+        '201':
+          description: Category created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+  /category:
+    post:
+      summary: Create a category
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CategoryInput'
+      responses:
+        '201':
+          description: Category created
+  /category/{category_id}:
+    parameters:
+      - in: path
+        name: category_id
+        required: true
+        schema:
+          type: integer
+    get:
+      summary: Get a category by ID
+      responses:
+        '200':
+          description: Category
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+        '404':
+          description: Category not found
+    patch:
+      summary: Update category fields
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CategoryInput'
+      responses:
+        '200':
+          description: Category updated
+    delete:
+      summary: Delete a category
+      responses:
+        '200':
+          description: Category deleted
+        '409':
+          description: Category is referenced by a product
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    Category:
+      type: object
+      required: [category_id, active, name]
+      properties:
+        category_id:
+          type: integer
+        active:
+          type: integer
+          enum: [0, 1]
+        name:
+          type: string
+    CategoryInput:
+      type: object
+      required: [name]
+      properties:
+        active:
+          type: integer
+          enum: [0, 1]
+          default: 1
+        name:
+          type: string
+    Product:
+      type: object
+      required: [product_id, sku, active, id_category, name, image, description, price, stock]
+      properties:
+        product_id:
+          type: integer
+        sku:
+          type: string
+        active:
+          type: integer
+          enum: [0, 1]
+        id_category:
+          type: integer
+        name:
+          type: string
+        image:
+          type: string
+        description:
+          type: string
+        price:
+          type: number
+        stock:
+          type: integer
+    ProductInput:
+      type: object
+      required: [active, id_category, name, image, description, price, stock]
+      properties:
+        sku:
+          type: string
+          description: Optional. If omitted, generated from product_id.
+        active:
+          type: integer
+          enum: [0, 1]
+        id_category:
+          type: integer
+        name:
+          type: string
+        image:
+          type: string
+        description:
+          type: string
+        price:
+          type: number
+        stock:
+          type: integer

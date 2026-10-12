@@ -1,0 +1,13 @@
+{
+    "name": "uk295/shop-api",
+    "description": "Slim API for the üK295 shop database",
+    "type": "project",
+    "require": {
+        "php": "^8.1",
+        "slim/slim": "^4.15",
+        "slim/psr7": "^1.7"
+    },
+    "config": {
+        "sort-packages": true
+    }
+}
